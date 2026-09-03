@@ -136,6 +136,8 @@ The 69 vs 2 gap quantifies the false-positive cost of naive matching. 67 of thos
 
 Both chains correctly identify alice@corp.com as the compromised account and WKSTN-042 as the compromised host. The remaining 28 events (normal activity for bob, carol, dave, eve) produce no chain alerts.
 
+*(Note: Chains 1 and 2 share several events. In Phase 2, a deduplication step will merge overlapping chains involving the same identity and asset over the same time window into a single alert.)*
+
 ---
 
 ## 6. Edge-Case Tests and Results

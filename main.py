@@ -137,11 +137,15 @@ def main() -> None:
     print(f"    Baseline produced {len(baseline_matches)} raw correlations")
     print(f"    (This includes false positives — see docs/schema.md for explanation)")
 
+    import time
+    start_time = time.perf_counter()
     # ── Step 5: Rule-based correlation ────────────────────────────────────────
     print("\n[5/5] RUNNING rule-based correlation engine...")
 
     engine = RuleEngine()
     chains = engine.run(all_events, resolver)
+    end_time = time.perf_counter()
+    processing_time_ms = (end_time - start_time) * 1000
 
     for chain in chains:
         audit.log_rule_fired(
@@ -160,6 +164,9 @@ def main() -> None:
     print(f"\n  Total events processed:    {len(all_events)}")
     print(f"  Baseline correlations:     {len(baseline_matches)} (naive join)")
     print(f"  Rule-based chains:         {len(chains)}")
+    print(f"  Time-to-correlate:         {processing_time_ms:.2f} ms")
+    if len(chains) > 1:
+         print(f"  (Note: Deduplication of overlapping chains will be added in Phase 2)")
     print()
 
     if not chains:
