@@ -1,0 +1,6 @@
+# Attack-Chain Correlation Engine — Dependencies
+# Phase 1 uses ONLY Python standard library + pytest.
+# No external packages required to run main.py.
+
+# Testing only:
+pytest>=7.0

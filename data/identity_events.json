@@ -1,0 +1,167 @@
+[
+  {
+    "userId": "alice@corp.com",
+    "timestamp": "2024-11-15T08:01:00Z",
+    "eventType": "LOGIN_FAILED",
+    "riskLevel": "medium",
+    "sourceIp": "185.220.101.45",
+    "deviceId": null,
+    "sessionId": null,
+    "location": "RU",
+    "userAgent": "python-requests/2.28"
+  },
+  {
+    "userId": "alice@corp.com",
+    "timestamp": "2024-11-15T08:01:30Z",
+    "eventType": "LOGIN_FAILED",
+    "riskLevel": "medium",
+    "sourceIp": "185.220.101.45",
+    "deviceId": null,
+    "sessionId": null,
+    "location": "RU",
+    "userAgent": "python-requests/2.28"
+  },
+  {
+    "userId": "alice@corp.com",
+    "timestamp": "2024-11-15T08:02:00Z",
+    "eventType": "LOGIN_FAILED",
+    "riskLevel": "medium",
+    "sourceIp": "185.220.101.45",
+    "deviceId": null,
+    "sessionId": null,
+    "location": "RU",
+    "userAgent": "python-requests/2.28"
+  },
+  {
+    "userId": "alice@corp.com",
+    "timestamp": "2024-11-15T08:02:30Z",
+    "eventType": "LOGIN_FAILED",
+    "riskLevel": "high",
+    "sourceIp": "185.220.101.45",
+    "deviceId": null,
+    "sessionId": null,
+    "location": "RU",
+    "userAgent": "python-requests/2.28"
+  },
+  {
+    "userId": "alice@corp.com",
+    "timestamp": "2024-11-15T08:03:10Z",
+    "eventType": "LOGIN_FAILED",
+    "riskLevel": "high",
+    "sourceIp": "185.220.101.45",
+    "deviceId": null,
+    "sessionId": null,
+    "location": "RU",
+    "userAgent": "python-requests/2.28"
+  },
+  {
+    "userId": "alice@corp.com",
+    "timestamp": "2024-11-15T08:04:00Z",
+    "eventType": "LOGIN_SUCCESS",
+    "riskLevel": "high",
+    "sourceIp": "185.220.101.45",
+    "deviceId": "WKSTN-042",
+    "sessionId": "sess-alice-001",
+    "location": "RU",
+    "userAgent": "python-requests/2.28"
+  },
+  {
+    "userId": "alice@corp.com",
+    "timestamp": "2024-11-15T08:04:45Z",
+    "eventType": "MFA_BYPASS",
+    "riskLevel": "critical",
+    "sourceIp": "185.220.101.45",
+    "deviceId": "WKSTN-042",
+    "sessionId": "sess-alice-001",
+    "location": "RU",
+    "userAgent": "python-requests/2.28"
+  },
+  {
+    "userId": "bob@corp.com",
+    "timestamp": "2024-11-15T09:00:00Z",
+    "eventType": "LOGIN_SUCCESS",
+    "riskLevel": "low",
+    "sourceIp": "10.0.1.5",
+    "deviceId": "WKSTN-017",
+    "sessionId": "sess-bob-001",
+    "location": "US",
+    "userAgent": "Mozilla/5.0"
+  },
+  {
+    "userId": "bob@corp.com",
+    "timestamp": "2024-11-15T09:30:00Z",
+    "eventType": "PASSWORD_RESET",
+    "riskLevel": "low",
+    "sourceIp": "10.0.1.5",
+    "deviceId": "WKSTN-017",
+    "sessionId": "sess-bob-001",
+    "location": "US",
+    "userAgent": "Mozilla/5.0"
+  },
+  {
+    "userId": "carol@corp.com",
+    "timestamp": "2024-11-15T10:00:00Z",
+    "eventType": "LOGIN_FAILED",
+    "riskLevel": "low",
+    "sourceIp": "10.0.2.33",
+    "deviceId": null,
+    "sessionId": null,
+    "location": "US",
+    "userAgent": "Mozilla/5.0"
+  },
+  {
+    "userId": "carol@corp.com",
+    "timestamp": "2024-11-15T10:01:00Z",
+    "eventType": "LOGIN_SUCCESS",
+    "riskLevel": "low",
+    "sourceIp": "10.0.2.33",
+    "deviceId": "WKSTN-099",
+    "sessionId": "sess-carol-001",
+    "location": "US",
+    "userAgent": "Mozilla/5.0"
+  },
+  {
+    "userId": "dave@corp.com",
+    "timestamp": "2024-11-15T11:00:00Z",
+    "eventType": "LOGIN_FAILED",
+    "riskLevel": "medium",
+    "sourceIp": "203.0.113.77",
+    "deviceId": null,
+    "sessionId": null,
+    "location": "CN",
+    "userAgent": "curl/7.68"
+  },
+  {
+    "userId": "dave@corp.com",
+    "timestamp": "2024-11-15T11:00:20Z",
+    "eventType": "LOGIN_FAILED",
+    "riskLevel": "medium",
+    "sourceIp": "203.0.113.77",
+    "deviceId": null,
+    "sessionId": null,
+    "location": "CN",
+    "userAgent": "curl/7.68"
+  },
+  {
+    "userId": "dave@corp.com",
+    "timestamp": "2024-11-15T11:00:40Z",
+    "eventType": "LOGIN_FAILED",
+    "riskLevel": "medium",
+    "sourceIp": "203.0.113.77",
+    "deviceId": null,
+    "sessionId": null,
+    "location": "CN",
+    "userAgent": "curl/7.68"
+  },
+  {
+    "userId": "eve@corp.com",
+    "timestamp": "2024-11-15T07:00:00Z",
+    "eventType": "LOGIN_SUCCESS",
+    "riskLevel": "low",
+    "sourceIp": "10.0.3.12",
+    "deviceId": "SRV-DC-01",
+    "sessionId": "sess-eve-001",
+    "location": "US",
+    "userAgent": "Mozilla/5.0"
+  }
+]
