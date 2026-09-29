@@ -1,6 +1,9 @@
 # Attack-Chain Correlation Engine — Dependencies
 # Phase 1 uses ONLY Python standard library + pytest.
-# No external packages required to run main.py.
+# Phase 2 adds PyYAML for config file loading.
+
+# Runtime:
+pyyaml>=6.0
 
 # Testing only:
 pytest>=7.0

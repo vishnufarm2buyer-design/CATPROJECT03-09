@@ -1,0 +1,61 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Attack-Chain Correlation Engine — Rule Configuration
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# A security lead can edit these thresholds without touching code.
+# The engine reads this file at startup. If missing, hardcoded defaults apply.
+#
+# To tune a rule: change the value here → re-run main.py. No code changes.
+# ══════════════════════════════════════════════════════════════════════════════
+
+rules:
+  brute_force_endpoint:
+    min_failures: 3                      # Minimum failed logins to qualify
+    failure_window_minutes: 10           # Sliding window for counting failures
+    endpoint_follow_window_minutes: 15   # Window after last failure for endpoint event
+    base_confidence: 0.60
+    extra_failure_bonus: 0.10            # Per extra failure above minimum
+    max_extra_failure_bonus: 0.20        # Cap on extra-failure bonus
+    critical_severity_bonus: 0.10        # Bonus if endpoint event is critical
+    multiple_events_bonus: 0.05          # Bonus if >1 suspicious endpoint events
+
+  mfa_bypass_compromise:
+    bypass_window_minutes: 5             # Window for MFA_BYPASS after LOGIN_SUCCESS
+    endpoint_follow_window_minutes: 15   # Window after bypass for endpoint event
+    base_confidence: 0.75
+    critical_severity_bonus: 0.10
+
+  phishing_to_cloud_compromise:
+    phish_to_login_window_minutes: 30    # Window from phishing click to credential login
+    login_to_cloud_window_minutes: 60    # Window from login to cloud abuse
+    base_confidence: 0.55
+    ip_match_bonus: 0.15                 # Bonus if login IP matches phishing source
+    dns_suspicious_bonus: 0.10           # Bonus if DNS query to known-bad domain
+    role_assume_bonus: 0.10              # Bonus if CLOUD_ROLE_ASSUME detected
+    endpoint_corroboration_bonus: 0.10   # Bonus if suspicious endpoint event found
+
+# Session-bounded entity resolution
+entity_resolution:
+  max_session_hours: 8.0                 # Default session cap when logout_time is unknown
+
+# Suspicious process heuristics (used by all endpoint-checking rules)
+suspicious_processes:
+  - mimikatz.exe
+  - meterpreter
+  - cobalt
+  - svchost32.exe
+
+suspicious_args:
+  - "-enc"
+  - "-encodedcommand"
+  - "-nop"
+  - "sekurlsa"
+  - "net user /domain"
+  - "whoami"
+  - "ipconfig /all"
+  - "net localgroup"
+  - "persistence"
+
+# Baseline comparison settings
+baseline:
+  window_minutes: 10
