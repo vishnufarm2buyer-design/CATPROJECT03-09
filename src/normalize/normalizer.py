@@ -114,6 +114,18 @@ _NETWORK_EVENT_TYPE_MAP = {
     "DNS": "DNS_QUERY",
 }
 
+_CLOUD_SEVERITY_MAP = {
+    "low": "low", "medium": "medium", "high": "high", "critical": "critical",
+    "info": "low",
+}
+
+_CLOUD_EVENT_TYPE_MAP = {
+    "CLOUD_API_CALL": "CLOUD_API_CALL",
+    "CLOUD_ROLE_ASSUME": "CLOUD_ROLE_ASSUME",
+    "AssumeRole": "CLOUD_ROLE_ASSUME",
+    "API_CALL": "CLOUD_API_CALL",
+}
+
 class NormalizationError(Exception):
     """Raised when an event cannot be normalized."""
 
@@ -161,10 +173,11 @@ def normalize(raw: dict, source: str) -> CommonEvent:
             return _normalize_email(raw)
         elif source == "network":
             return _normalize_network(raw)
+        elif source == "cloud":
+            return _normalize_cloud(raw)
         else:
-            # Phase 2 sources: cloud
             raise NormalizationError(
-                f"Normalizer for source {source!r} not yet implemented (Phase 2)"
+                f"Normalizer for source {source!r} not yet implemented"
             )
     except (KeyError, ValueError, TypeError) as exc:
         raise NormalizationError(f"Failed to normalize {source} event: {exc}") from exc
@@ -322,5 +335,38 @@ def _normalize_network(raw: dict) -> CommonEvent:
         raw_payload=dict(raw),
         identity_id=None,
         asset_id=asset_id,
+        session_id=None,
+    )
+
+
+def _normalize_cloud(raw: dict) -> CommonEvent:
+    """
+    Map a cloud-tool raw event to CommonEvent.
+    """
+    try:
+        timestamp = _parse_timestamp(raw["timestamp"])
+    except (ValueError, KeyError) as exc:
+        raise NormalizationError(f"Invalid timestamp: {exc}") from exc
+
+    raw_event_type = raw.get("eventType", "UNKNOWN")
+    event_type = _CLOUD_EVENT_TYPE_MAP.get(raw_event_type, "UNKNOWN")
+    if event_type not in VALID_EVENT_TYPES:
+        logger.warning("Unknown cloud event type %r — mapping to UNKNOWN", raw_event_type)
+        event_type = "UNKNOWN"
+
+    raw_severity = str(raw.get("severity", "low")).lower()
+    severity = _CLOUD_SEVERITY_MAP.get(raw_severity, "low")
+    if severity not in VALID_SEVERITIES:
+        severity = "low"
+
+    return CommonEvent(
+        event_id=CommonEvent.new_id(),
+        timestamp=timestamp,
+        source="cloud",
+        event_type=event_type,
+        severity=severity,
+        raw_payload=dict(raw),
+        identity_id=raw.get("principal") or None,
+        asset_id=None,
         session_id=None,
     )

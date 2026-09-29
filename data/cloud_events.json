@@ -1,0 +1,123 @@
+[
+  {
+    "eventId": "cloud-001",
+    "timestamp": "2024-11-15T08:10:00Z",
+    "eventType": "CLOUD_ROLE_ASSUME",
+    "principal": "alice@corp.com",
+    "service": "IAM",
+    "action": "AssumeRole",
+    "sourceIp": "185.220.101.45",
+    "severity": "high",
+    "resourceArn": "arn:aws:iam::123456:role/admin-access"
+  },
+  {
+    "eventId": "cloud-002",
+    "timestamp": "2024-11-15T08:12:00Z",
+    "eventType": "CLOUD_API_CALL",
+    "principal": "alice@corp.com",
+    "service": "S3",
+    "action": "GetObject",
+    "sourceIp": "185.220.101.45",
+    "severity": "critical",
+    "resourceArn": "arn:aws:s3:::sensitive-data-bucket/customer-db.sql"
+  },
+  {
+    "eventId": "cloud-003",
+    "timestamp": "2024-11-15T08:13:00Z",
+    "eventType": "CLOUD_API_CALL",
+    "principal": "alice@corp.com",
+    "service": "S3",
+    "action": "ListBuckets",
+    "sourceIp": "185.220.101.45",
+    "severity": "medium",
+    "resourceArn": null
+  },
+  {
+    "eventId": "cloud-004",
+    "timestamp": "2024-11-15T08:15:00Z",
+    "eventType": "CLOUD_API_CALL",
+    "principal": "alice@corp.com",
+    "service": "EC2",
+    "action": "DescribeInstances",
+    "sourceIp": "185.220.101.45",
+    "severity": "medium",
+    "resourceArn": null
+  },
+  {
+    "eventId": "cloud-005",
+    "timestamp": "2024-11-15T09:05:00Z",
+    "eventType": "CLOUD_API_CALL",
+    "principal": "bob@corp.com",
+    "service": "S3",
+    "action": "PutObject",
+    "sourceIp": "10.0.1.5",
+    "severity": "low",
+    "resourceArn": "arn:aws:s3:::team-reports/weekly.pdf"
+  },
+  {
+    "eventId": "cloud-006",
+    "timestamp": "2024-11-15T09:15:00Z",
+    "eventType": "CLOUD_API_CALL",
+    "principal": "bob@corp.com",
+    "service": "CloudWatch",
+    "action": "GetMetricData",
+    "sourceIp": "10.0.1.5",
+    "severity": "low",
+    "resourceArn": null
+  },
+  {
+    "eventId": "cloud-007",
+    "timestamp": "2024-11-15T10:05:00Z",
+    "eventType": "CLOUD_API_CALL",
+    "principal": "carol@corp.com",
+    "service": "DynamoDB",
+    "action": "Query",
+    "sourceIp": "10.0.2.33",
+    "severity": "low",
+    "resourceArn": "arn:aws:dynamodb:us-east-1:123456:table/app-data"
+  },
+  {
+    "eventId": "cloud-008",
+    "timestamp": "2024-11-15T13:40:00Z",
+    "eventType": "CLOUD_API_CALL",
+    "principal": "lambda-processor@aws.internal",
+    "service": "Lambda",
+    "action": "Invoke",
+    "sourceIp": null,
+    "severity": "low",
+    "resourceArn": "arn:aws:lambda:us-east-1:123456:function:data-etl"
+  },
+  {
+    "eventId": "cloud-009",
+    "timestamp": "2024-11-15T13:41:00Z",
+    "eventType": "CLOUD_API_CALL",
+    "principal": "lambda-processor@aws.internal",
+    "service": "S3",
+    "action": "PutObject",
+    "sourceIp": null,
+    "severity": "low",
+    "resourceArn": "arn:aws:s3:::etl-output/result.json"
+  },
+  {
+    "eventId": "cloud-010",
+    "timestamp": "2024-11-15T07:16:00Z",
+    "eventType": "CLOUD_API_CALL",
+    "principal": "eve@corp.com",
+    "service": "IAM",
+    "action": "ListUsers",
+    "sourceIp": "10.0.3.12",
+    "severity": "medium",
+    "resourceArn": null
+  },
+  {
+    "eventId": "cloud-011",
+    "timestamp": "2024-11-15T07:17:00Z",
+    "eventType": "CLOUD_ROLE_ASSUME",
+    "principal": "eve@corp.com",
+    "service": "IAM",
+    "action": "AssumeRole",
+    "sourceIp": "10.0.3.12",
+    "severity": "high",
+    "resourceArn": "arn:aws:iam::123456:role/security-audit"
+  }
+]
