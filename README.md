@@ -1,5 +1,5 @@
 # Attack-Chain Correlation Engine
-## Phase 1 — 35% Completion (Semester 5, C28)
+## Phase 2 — Completed (Semester 5, C28)
 
 ---
 
@@ -9,16 +9,19 @@
 # 1. Clone / navigate to this directory
 cd "attack-chain-correlator"
 
-# 2. Install test dependency (only pytest — engine has no runtime dependencies)
-pip install pytest
+# 2. Install dependencies (PyYAML for config, pytest for testing)
+pip install -r requirements.txt
 
 # 3. Run the engine end-to-end
 python -X utf8 main.py
 
-# 4. Run all tests
+# 4. Run the formal experiment (Benchmarks vs Baseline)
+python -X utf8 src/experiment/run_experiment.py
+
+# 5. Run all 21 tests
 python -X utf8 -m pytest tests/ -v
 
-# 5. (Optional) Regenerate synthetic data from scratch
+# 6. (Optional) Regenerate synthetic data from scratch
 python data/generate_samples.py
 ```
 
@@ -26,103 +29,56 @@ python data/generate_samples.py
 
 ---
 
-## What This Is
+## What's Built So Far (Phase 2)
 
-A correlation engine that links security events from disconnected tools across
-**identity** and **endpoint** domains, detects multi-stage attack chains using
-rule-based logic, and writes every decision to an append-only audit trail.
+**Phase 1** delivered the core pipeline: adapter pattern, common schema, entity resolution, a rule-based correlation engine, append-only JSONL audit trail, and Graceful Degradation edge-case tests.
 
-This is Phase 1 of 3. It proves the core architectural pattern end-to-end with
-2 of the 5 planned sources, synthetic data, and 2 correlation rules.
+**Phase 2** expands the system:
+- **5-Source Coverage**: Added Email, Network, and Cloud adapters alongside Identity and Endpoint.
+- **Cross-Domain Correlation**: Added `PHISHING_TO_CLOUD_COMPROMISE` rule spanning all 5 domains in a single attack chain.
+- **Session-Time-Bounded Resolution**: Entity resolution now uses session `login_time` / `logout_time` to prevent shared-workstation false positives (mitigates Risk R2).
+- **Externalized Configuration**: Rule thresholds and heuristics are loaded from `config.yaml` (editable by security leads without code changes).
+- **Formal Experiment**: Benchmarks the rule engine against a naive baseline, measuring Precision (100%) and Recall (75%).
+
+*(Phase 3 will add chain deduplication, ML anomaly detection, and a rollback workflow.)*
 
 ---
 
 ## Repo Structure
 
-```
+```text
 attack-chain-correlator/
-│
+├── data/                         # Synthetic events (Identity, Endpoint, Email, Network, Cloud)
+│   └── generate_samples.py       # Deterministic generator
 ├── docs/
-│   ├── stakeholder_assumptions.md  ← Who uses this, constraints, success definition
-│   ├── architecture.md             ← Mermaid diagram + written walkthrough
-│   ├── schema.md                   ← CommonEvent + entity table schemas
-│   └── risk_register.md            ← 5 risks with likelihood/impact/mitigation
-│
-├── data/
-│   ├── identity_events.json        ← 15 synthetic identity events (5 users)
-│   ├── endpoint_events.json        ← 15 synthetic endpoint events (6 hosts)
-│   └── generate_samples.py         ← Reproducible data generator
-│
+│   ├── architecture.md           # System design & assumptions
+│   ├── schema.md                 # Universal event schema
+│   ├── risk_register.md          # Project risks (R2 mitigated)
+│   ├── writeup.md                # Phase 1 project narrative
+│   └── writeup_phase2.md         # Phase 2 walkthrough & explain-to-me addendum
 ├── src/
-│   ├── ingest/
-│   │   ├── base_adapter.py         ← Abstract adapter (missing-source safe)
-│   │   ├── identity_adapter.py     ← Identity tool adapter
-│   │   └── endpoint_adapter.py     ← Endpoint tool adapter
-│   │
-│   ├── normalize/
-│   │   ├── schema.py               ← CommonEvent dataclass (the unified schema)
-│   │   └── normalizer.py           ← Source-specific field mapping
-│   │
-│   ├── entity/
-│   │   ├── models.py               ← Identity, Asset, Session dataclasses
-│   │   └── resolver.py             ← identity_id <-> asset_id linker
-│   │
+│   ├── audit/                    # Append-only ledger
 │   ├── correlate/
-│   │   ├── baseline.py             ← Naive join baseline (comparison point)
-│   │   ├── rules.py                ← Rule engine (2 rules)
-│   │   └── chain.py                ← CorrelationChain output object
-│   │
-│   └── audit/
-│       └── writer.py               ← Append-only JSONL audit trail
-│
-├── tests/
-│   ├── test_missing_source.py      ← Edge case: source file offline
-│   ├── test_delayed_event.py       ← Edge case: event outside time window
-│   └── test_malformed_event.py     ← Edge case: bad/incomplete event data
-│
-├── main.py                         ← End-to-end runner
-├── requirements.txt                ← pytest only (stdlib for runtime)
-└── README.md                       ← This file
+│   │   ├── config.yaml           # Externalized rule thresholds (NEW)
+│   │   ├── baseline.py           # Naive join (for experiment)
+│   │   ├── chain.py              # Output models
+│   │   └── rules.py              # Rule engine + 3 correlation patterns
+│   ├── entity/                   # Session-bounded resolution (models.py, resolver.py)
+│   ├── experiment/               # Formal performance benchmark
+│   │   └── run_experiment.py
+│   ├── ingest/                   # 5 Adapters (identity, endpoint, email, network, cloud)
+│   └── normalize/                # normalizer.py, schema.py
+├── tests/                        # 21 Pytest edge-case & functional tests
+├── main.py                       # The end-to-end pipeline runner
+└── requirements.txt              # Dependencies (pyyaml, pytest)
 ```
 
 ---
 
-## What Phase 1 Does (35% Complete)
-
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Identity source adapter | Done | Reads identity_events.json |
-| Endpoint source adapter | Done | Reads endpoint_events.json |
-| Normalization to CommonEvent | Done | Field mapping + UTC timestamp parsing |
-| Entity resolution (identity <-> asset) | Done | Session-based linking |
-| Naive baseline | Done | 69 raw correlations on sample data |
-| Rule 1: Brute Force + Endpoint | Done | Fires correctly on alice@corp.com |
-| Rule 2: MFA Bypass + Endpoint | Done | Fires correctly on alice@corp.com |
-| Audit trail (JSONL) | Done | Written to audit_trail.jsonl |
-| 3 edge-case tests | Done | 11 tests, all pass |
-| Stakeholder assumptions doc | Done | docs/stakeholder_assumptions.md |
-| Architecture diagram | Done | docs/architecture.md (Mermaid) |
-| Data schema | Done | docs/schema.md |
-| Risk register | Done | docs/risk_register.md (5 risks) |
-
----
-
-## Phase 2 (Remaining 65%)
-
-| Item | Phase |
-|------|-------|
-| Email, network, cloud adapters (3 more sources) | Phase 2 |
-| Real-time webhook ingestion | Phase 2 |
-| Measured experiment: baseline vs rule engine (FP rate, time-to-detect) | Phase 2 |
-| Session-level entity resolution (fixes Risk R2 — shared workstations) | Phase 2 |
-| Config file for rule thresholds (no-code tuning) | Phase 2 |
-| Rollback / change-review workflow for rules | Phase 2 |
-| ML-based correlation (complement to rule engine) | Phase 3 |
-| User guide and stakeholder validation session | Phase 2/3 |
-| SIEM webhook output integration | Phase 2 |
-| Alert throttling / deduplication | Phase 2 |
-
----
+## Configuration (`config.yaml`)
+Rule thresholds and heuristic lists have been externalized to `src/correlate/config.yaml`. 
+Security analysts can tweak correlation windows, min failure thresholds, and suspicious processes without altering code. 
+If the file is deleted, the engine falls back to hardcoded safe defaults.
 
 ## Audit Trail
 
@@ -131,13 +87,4 @@ Every run appends records to `audit_trail.jsonl` in this format:
 ```json
 {"ts": "2024-11-15T08:05:30+00:00", "event_type": "RULE_FIRED", "actor": "engine",
  "detail": {"rule": "BRUTE_FORCE_ENDPOINT", "identity_id": "alice@corp.com", ...}}
-```
-
-To inspect it: `cat audit_trail.jsonl` or grep for specific events:
-```bash
-# Find all chain creation events
-grep "CHAIN_CREATED" audit_trail.jsonl
-
-# Find all decisions about alice
-grep "alice@corp.com" audit_trail.jsonl
 ```
