@@ -192,7 +192,7 @@ class RuleEngine:
     def __init__(self, config: dict | None = None) -> None:
         self.cfg = config or CONFIG
 
-    def _rule_cfg(self, rule_name: str) -> dict:
+    def _get_rule_cfg(self, rule_name: str) -> dict:
         """Get config dict for a specific rule, with defaults."""
         return self.cfg.get("rules", {}).get(rule_name, {})
 
@@ -252,7 +252,7 @@ class RuleEngine:
 
         All thresholds and confidence weights are loaded from config.yaml.
         """
-        cfg = self._rule_cfg("brute_force_endpoint")
+        cfg = self._get_rule_cfg("brute_force_endpoint")
         min_failures = cfg.get("min_failures", 3)
         brute_window = timedelta(minutes=cfg.get("failure_window_minutes", 10))
         follow_window = timedelta(minutes=cfg.get("endpoint_follow_window_minutes", 15))
@@ -357,7 +357,7 @@ class RuleEngine:
 
         All thresholds loaded from config.yaml.
         """
-        cfg = self._rule_cfg("mfa_bypass_compromise")
+        cfg = self._get_rule_cfg("mfa_bypass_compromise")
         bypass_window = timedelta(minutes=cfg.get("bypass_window_minutes", 5))
         follow_window = timedelta(minutes=cfg.get("endpoint_follow_window_minutes", 15))
         base_confidence = cfg.get("base_confidence", 0.75)
@@ -461,7 +461,7 @@ class RuleEngine:
           - +0.10 if suspicious endpoint event on linked asset
           - Cap at 1.0
         """
-        cfg = self._rule_cfg("phishing_to_cloud_compromise")
+        cfg = self._get_rule_cfg("phishing_to_cloud_compromise")
         phish_to_login = timedelta(minutes=cfg.get("phish_to_login_window_minutes", 30))
         login_to_cloud = timedelta(minutes=cfg.get("login_to_cloud_window_minutes", 60))
         base_confidence = cfg.get("base_confidence", 0.55)
