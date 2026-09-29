@@ -1,7 +1,7 @@
 """
 main.py
 -------
-End-to-end runner for the Attack-Chain Correlation Engine (Phase 1).
+End-to-end runner for the Attack-Chain Correlation Engine (Phase 2).
 
 WHAT THIS SCRIPT DOES (in order):
   1. INGEST  — load raw events from identity + endpoint JSON files
@@ -55,7 +55,7 @@ AUDIT_FILE = PROJECT_ROOT / "audit_trail.jsonl"
 
 def main() -> None:
     print("=" * 70)
-    print("  Attack-Chain Correlation Engine — Phase 1")
+    print("  Attack-Chain Correlation Engine — Phase 2")
     print("=" * 70)
 
     # ── Step 0: Initialize audit trail ────────────────────────────────────────
@@ -67,23 +67,34 @@ def main() -> None:
 
     id_adapter = IdentityAdapter()
     ep_adapter = EndpointAdapter()
+    from src.ingest.email_adapter import EmailAdapter
+    from src.ingest.network_adapter import NetworkAdapter
+    from src.ingest.cloud_adapter import CloudAdapter
+    
+    em_adapter = EmailAdapter()
+    nw_adapter = NetworkAdapter()
+    cl_adapter = CloudAdapter()
 
     raw_identity = id_adapter.load(IDENTITY_FILE)
     raw_endpoint = ep_adapter.load(ENDPOINT_FILE)
+    raw_email = em_adapter.load(DATA_DIR / "email_events.json")
+    raw_network = nw_adapter.load(DATA_DIR / "network_events.json")
+    raw_cloud = cl_adapter.load(DATA_DIR / "cloud_events.json")
 
     # Log ingestion to audit trail
-    if raw_identity:
-        audit.log_ingestion_success("identity", len(raw_identity), str(IDENTITY_FILE))
-    else:
-        audit.log_source_missing("identity", str(IDENTITY_FILE))
-
-    if raw_endpoint:
-        audit.log_ingestion_success("endpoint", len(raw_endpoint), str(ENDPOINT_FILE))
-    else:
-        audit.log_source_missing("endpoint", str(ENDPOINT_FILE))
-
-    print(f"    Identity events loaded:  {len(raw_identity)}")
-    print(f"    Endpoint events loaded:  {len(raw_endpoint)}")
+    for source, raw, path in [
+        ("identity", raw_identity, IDENTITY_FILE),
+        ("endpoint", raw_endpoint, ENDPOINT_FILE),
+        ("email", raw_email, DATA_DIR / "email_events.json"),
+        ("network", raw_network, DATA_DIR / "network_events.json"),
+        ("cloud", raw_cloud, DATA_DIR / "cloud_events.json"),
+    ]:
+        if raw:
+            audit.log_ingestion_success(source, len(raw), str(path))
+            print(f"    {source.capitalize():8} events loaded:  {len(raw)}")
+        else:
+            audit.log_source_missing(source, str(path))
+            print(f"    {source.capitalize():8} events loaded:  0 (MISSING)")
 
     # ── Step 2: Normalize ─────────────────────────────────────────────────────
     print("\n[2/5] NORMALIZING events to CommonEvent schema...")
@@ -91,19 +102,19 @@ def main() -> None:
     all_events = []
     norm_errors = 0
 
-    for raw in raw_identity:
-        try:
-            all_events.append(normalize(raw, "identity"))
-        except NormalizationError as exc:
-            audit.log_normalization_error("identity", raw, str(exc))
-            norm_errors += 1
-
-    for raw in raw_endpoint:
-        try:
-            all_events.append(normalize(raw, "endpoint"))
-        except NormalizationError as exc:
-            audit.log_normalization_error("endpoint", raw, str(exc))
-            norm_errors += 1
+    for source, raw_list in [
+        ("identity", raw_identity),
+        ("endpoint", raw_endpoint),
+        ("email", raw_email),
+        ("network", raw_network),
+        ("cloud", raw_cloud),
+    ]:
+        for raw in raw_list:
+            try:
+                all_events.append(normalize(raw, source))
+            except NormalizationError as exc:
+                audit.log_normalization_error(source, raw, str(exc))
+                norm_errors += 1
 
     print(f"    Normalized: {len(all_events)} events ({norm_errors} errors)")
 
