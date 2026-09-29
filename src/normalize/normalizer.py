@@ -89,6 +89,19 @@ _ENDPOINT_EVENT_TYPE_MAP = {
 }
 
 
+_EMAIL_SEVERITY_MAP = {
+    "low": "low", "medium": "medium", "high": "high", "critical": "critical",
+    "info": "low", "warning": "medium",
+}
+
+_EMAIL_EVENT_TYPE_MAP = {
+    "EMAIL_DELIVERED": "EMAIL_DELIVERED",
+    "EMAIL_CLICK": "EMAIL_CLICK",
+    "PHISHING_CLICK": "EMAIL_CLICK",  # Normalize phishing click to EMAIL_CLICK
+    "EMAIL_ATTACHMENT": "EMAIL_ATTACHMENT",
+    "LINK_CLICK": "EMAIL_CLICK",
+}
+
 class NormalizationError(Exception):
     """Raised when an event cannot be normalized."""
 
@@ -132,8 +145,10 @@ def normalize(raw: dict, source: str) -> CommonEvent:
             return _normalize_identity(raw)
         elif source == "endpoint":
             return _normalize_endpoint(raw)
+        elif source == "email":
+            return _normalize_email(raw)
         else:
-            # Phase 2 sources: email, network, cloud
+            # Phase 2 sources: network, cloud
             raise NormalizationError(
                 f"Normalizer for source {source!r} not yet implemented (Phase 2)"
             )
@@ -219,4 +234,43 @@ def _normalize_endpoint(raw: dict) -> CommonEvent:
         identity_id=raw.get("loggedOnUser") or None,  # OPTIONAL
         asset_id=raw.get("hostName") or None,
         session_id=None,   # Endpoint tool doesn't export session IDs in Phase 1
+    )
+
+
+def _normalize_email(raw: dict) -> CommonEvent:
+    """
+    Map an email-tool raw event to CommonEvent.
+
+    Field mapping:
+      recipient     → identity_id
+      timestamp     → timestamp  (parsed to UTC)
+      eventType     → event_type (via lookup table)
+      severity      → severity   (via lookup table)
+    """
+    try:
+        timestamp = _parse_timestamp(raw["timestamp"])
+    except (ValueError, KeyError) as exc:
+        raise NormalizationError(f"Invalid timestamp: {exc}") from exc
+
+    raw_event_type = raw.get("eventType", "UNKNOWN")
+    event_type = _EMAIL_EVENT_TYPE_MAP.get(raw_event_type, "UNKNOWN")
+    if event_type not in VALID_EVENT_TYPES:
+        logger.warning("Unknown email event type %r — mapping to UNKNOWN", raw_event_type)
+        event_type = "UNKNOWN"
+
+    raw_severity = str(raw.get("severity", "low")).lower()
+    severity = _EMAIL_SEVERITY_MAP.get(raw_severity, "low")
+    if severity not in VALID_SEVERITIES:
+        severity = "low"
+
+    return CommonEvent(
+        event_id=CommonEvent.new_id(),
+        timestamp=timestamp,
+        source="email",
+        event_type=event_type,
+        severity=severity,
+        raw_payload=dict(raw),
+        identity_id=raw.get("recipient") or None,
+        asset_id=None,
+        session_id=None,
     )

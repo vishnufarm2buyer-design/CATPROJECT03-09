@@ -43,7 +43,7 @@ VALID_EVENT_TYPES = {
     # Endpoint events
     "PROCESS_EXEC", "FILE_WRITE", "NETWORK_CONN",
     # Email events (Phase 2)
-    "EMAIL_CLICK", "EMAIL_ATTACHMENT",
+    "EMAIL_CLICK", "EMAIL_ATTACHMENT", "EMAIL_DELIVERED",
     # Network events (Phase 2)
     "DNS_QUERY", "NET_FLOW",
     # Cloud events (Phase 2)
