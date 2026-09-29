@@ -102,6 +102,18 @@ _EMAIL_EVENT_TYPE_MAP = {
     "LINK_CLICK": "EMAIL_CLICK",
 }
 
+_NETWORK_SEVERITY_MAP = {
+    "low": "low", "medium": "medium", "high": "high", "critical": "critical",
+    "info": "low",
+}
+
+_NETWORK_EVENT_TYPE_MAP = {
+    "DNS_QUERY": "DNS_QUERY",
+    "NET_FLOW": "NET_FLOW",
+    "NETFLOW": "NET_FLOW",
+    "DNS": "DNS_QUERY",
+}
+
 class NormalizationError(Exception):
     """Raised when an event cannot be normalized."""
 
@@ -147,8 +159,10 @@ def normalize(raw: dict, source: str) -> CommonEvent:
             return _normalize_endpoint(raw)
         elif source == "email":
             return _normalize_email(raw)
+        elif source == "network":
+            return _normalize_network(raw)
         else:
-            # Phase 2 sources: network, cloud
+            # Phase 2 sources: cloud
             raise NormalizationError(
                 f"Normalizer for source {source!r} not yet implemented (Phase 2)"
             )
@@ -272,5 +286,41 @@ def _normalize_email(raw: dict) -> CommonEvent:
         raw_payload=dict(raw),
         identity_id=raw.get("recipient") or None,
         asset_id=None,
+        session_id=None,
+    )
+
+
+def _normalize_network(raw: dict) -> CommonEvent:
+    """
+    Map a network-tool raw event to CommonEvent.
+    """
+    try:
+        timestamp = _parse_timestamp(raw["timestamp"])
+    except (ValueError, KeyError) as exc:
+        raise NormalizationError(f"Invalid timestamp: {exc}") from exc
+
+    raw_event_type = raw.get("eventType", "UNKNOWN")
+    event_type = _NETWORK_EVENT_TYPE_MAP.get(raw_event_type, "UNKNOWN")
+    if event_type not in VALID_EVENT_TYPES:
+        logger.warning("Unknown network event type %r — mapping to UNKNOWN", raw_event_type)
+        event_type = "UNKNOWN"
+
+    raw_severity = str(raw.get("severity", "low")).lower()
+    severity = _NETWORK_SEVERITY_MAP.get(raw_severity, "low")
+    if severity not in VALID_SEVERITIES:
+        severity = "low"
+
+    # hostName -> asset_id, fallback to sourceIp
+    asset_id = raw.get("hostName") or raw.get("sourceIp") or None
+
+    return CommonEvent(
+        event_id=CommonEvent.new_id(),
+        timestamp=timestamp,
+        source="network",
+        event_type=event_type,
+        severity=severity,
+        raw_payload=dict(raw),
+        identity_id=None,
+        asset_id=asset_id,
         session_id=None,
     )
