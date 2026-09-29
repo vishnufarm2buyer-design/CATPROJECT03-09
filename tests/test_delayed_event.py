@@ -32,13 +32,18 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.correlate.rules import (
-    BRUTE_FORCE_MIN_FAILURES,
-    BRUTE_FORCE_WINDOW_MINUTES,
-    ENDPOINT_FOLLOW_WINDOW_MINUTES,
     RuleEngine,
+    load_config,
 )
 from src.entity.resolver import EntityResolver
 from src.normalize.schema import CommonEvent
+
+# Load thresholds from config (same values the engine uses)
+_cfg = load_config()
+_brute_cfg = _cfg["rules"]["brute_force_endpoint"]
+BRUTE_FORCE_MIN_FAILURES = _brute_cfg["min_failures"]
+BRUTE_FORCE_WINDOW_MINUTES = _brute_cfg["failure_window_minutes"]
+ENDPOINT_FOLLOW_WINDOW_MINUTES = _brute_cfg["endpoint_follow_window_minutes"]
 
 # ── Helper to build synthetic CommonEvents in-memory ─────────────────────────
 
